@@ -1,11 +1,18 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "Moon Hub",HidePremium = false,SaveConfig = true,ConfigFolder = "MoonC",IntroIcon = "rbxassetid://16924654288",IntroText = "Moon Hub Loading..."
+local Window = OrionLib:MakeWindow({
+    Name = "Moon Hub",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "MoonC",
+    IntroIcon = "rbxassetid://16924654288",
+    IntroText = "Moon Hub Loading..."
 })
+
 OrionLib:MakeNotification({
-	Name = "Moon Hub!",
-	Content = "Bem Vindo ao Moon Hub",
-	Image = "rbxassetid://4483345998",
-	Time = 5
+    Name = "Moon Hub!",
+    Content = "Bem Vindo ao Moon Hub",
+    Image = "rbxassetid://4483345998",
+    Time = 5
 })
 
 local Tab = Window:MakeTab({
@@ -13,6 +20,7 @@ local Tab = Window:MakeTab({
     Icon = "rbxassetid://16924652746",
     PremiumOnly = false
 })
+
 local InfoSection = Tab:AddSection({
     Name = "Informations"
 })
@@ -28,26 +36,28 @@ Tab:AddTextbox({
         end
     end	  
 })
+
 local Tab2 = Window:MakeTab({
     Name = "Main",
     Icon = "rbxassetid://16924662905",
     PremiumOnly = false
 })
+
 local FarmSection = Tab2:AddSection({
     Name = "Farming Options"
 })
 
 local ToggleValue = false
-local CombatFramework = require(game:GetService("Players").LocalPlayer.PlayerScripts.CombatFramework)
-local Camera = require(game:GetService("ReplicatedStorage").Util.CameraShaker)
-
-Camera:Stop()
-
-local CombatConnection
 
 local function ToggleCombatScript(Value)
     ToggleValue = Value
     if ToggleValue then
+        local CombatFramework = require(game:GetService("Players").LocalPlayer.PlayerScripts.CombatFramework)
+        local Camera = require(game:GetService("ReplicatedStorage").Util.CameraShaker)
+
+        Camera:Stop()
+
+        local CombatConnection
         CombatConnection = game:GetService("RunService").Stepped:Connect(function()
             if getupvalues(CombatFramework)[2].activeController.timeToNextAttack then
                 getupvalues(CombatFramework)[2].activeController.timeToNextAttack = 0.000000000000001
@@ -61,6 +71,7 @@ local function ToggleCombatScript(Value)
         end
     end
 end
+
 Tab2:AddToggle({
     Name = "Ataques Rápidos",
     Default = false,
@@ -68,10 +79,14 @@ Tab2:AddToggle({
         ToggleCombatScript(Value)
     end
 })
+
 local function SetPoints(Value)
     local player = game:GetService("Players").LocalPlayer
-    if player.PlayerStats.Points.Value ~= Value then
-        player.PlayerStats.Points.Value = Value
+    if player:FindFirstChild("PlayerStats") and player.PlayerStats:FindFirstChild("Points") then
+        local points = player.PlayerStats.Points
+        if points.Value ~= Value then
+            points.Value = Value
+        end
     end
 end
 

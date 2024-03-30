@@ -2,7 +2,7 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shl
 local Window = OrionLib:MakeWindow({Name = "Moon Hub", HidePremium = false, SaveConfig = true, ConfigFolder = "MoonC", IntroIcon = "rbxassetid://16924654288", IntroText = "Moon Hub Loading..."})
 local TeleportService = game:GetService("TeleportService")
 local Tab = Window:MakeTab({
-    Name = "Info",
+    Name = "Info!",
     Icon = "rbxassetid://16924652746",
     PremiumOnly = false
 })

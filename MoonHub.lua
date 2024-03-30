@@ -1,18 +1,12 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({
-    Name = "Moon Hub",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "MoonC",
-    IntroIcon = "rbxassetid://16924654288",
-    IntroText = "Moon Hub Loading..."
+local Window = OrionLib:MakeWindow({Name = "Moon Hub",HidePremium = false,SaveConfig = true,ConfigFolder = "MoonC",IntroIcon = "rbxassetid://16924654288",IntroText = "Moon Hub Loading..."
 })
 local Tab = Window:MakeTab({
     Name = "Info",
     Icon = "rbxassetid://16924652746",
     PremiumOnly = false
 })
-local Section = Tab:AddSection({
+local InfoSection = Tab:AddSection({
     Name = "Informations"
 })
 
@@ -32,83 +26,82 @@ local Tab2 = Window:MakeTab({
     Icon = "rbxassetid://16924662905",
     PremiumOnly = false
 })
-local Section = Tab2:AddSection({
+local FarmSection = Tab2:AddSection({
     Name = "Farming Options"
 })
 
 local ToggleValue = false
 local CombatFramework = require(game:GetService("Players").LocalPlayer.PlayerScripts.CombatFramework)
-local Camera = require(game.ReplicatedStorage.Util.CameraShaker)
+local Camera = require(game:GetService("ReplicatedStorage").Util.CameraShaker)
 
-local FastAttackEnabled = false
-local SuperFastAttackEnabled = false
+Camera:Stop()
 
-local RigC = require(game:GetService("Players").LocalPlayer.PlayerScripts.CombatFramework)
-local VirtualUser = game:GetService('VirtualUser')
-local kkii = require(game.ReplicatedStorage.Util.CameraShaker)
+local CombatConnection
 
-local FastAttackConnection
-local SuperFastAttackConnection
-
-local function EnableFastAttack(value)
-    FastAttackEnabled = value
-    if FastAttackEnabled then
-        FastAttackConnection = game:GetService("RunService").Stepped:Connect(function()
-            if getupvalues(CombatFramework)[2]['activeController'].timeToNextAttack then
-                getupvalues(CombatFramework)[2]['activeController'].timeToNextAttack = 0
-                getupvalues(CombatFramework)[2]['activeController'].hitboxMagnitude = 50
-                getupvalues(CombatFramework)[2]['activeController']:attack()
+local function ToggleCombatScript(Value)
+    ToggleValue = Value
+    if ToggleValue then
+        CombatConnection = game:GetService("RunService").Stepped:Connect(function()
+            if getupvalues(CombatFramework)[2].activeController.timeToNextAttack then
+                getupvalues(CombatFramework)[2].activeController.timeToNextAttack = 0.00001
+                getupvalues(CombatFramework)[2].activeController.hitboxMagnitude = 500
+                getupvalues(CombatFramework)[2].activeController:attack()
             end
         end)
     else
-        if FastAttackConnection then
-            FastAttackConnection:Disconnect()
+        if CombatConnection then
+            CombatConnection:Disconnect()
+        end
+    end
+end
+Tab2:AddToggle({
+    Name = "Ataques Rápidos",
+    Default = false,
+    Callback = function(Value)
+        ToggleCombatScript(Value)
+    end
+})
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+
+local playerHeightAboveGround = 10
+local bringNpcsToggle = false
+
+local function distance(point1, point2)
+    return (point1 - point2).Magnitude
+end
+
+local function bringNPCsToPlayer()
+    local playerPosition = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart.Position
+
+    if playerPosition then
+        local ray = Ray.new(playerPosition + Vector3.new(0, 50, 0), Vector3.new(0, -100, 0))
+        local hit, hitPosition = Workspace:FindPartOnRay(ray, LocalPlayer.Character)
+
+        if hit then
+            local newPosition = hitPosition + Vector3.new(0, -playerHeightAboveGround, 0)
+            local NPCs = Workspace:GetChildren()
+
+            for _, NPC in ipairs(NPCs) do
+                if NPC:IsA("Model") and NPC:FindFirstChildOfClass("Humanoid") then
+                    NPC:SetPrimaryPartCFrame(CFrame.new(newPosition))
+                end
+            end
         end
     end
 end
 
-local function EnableSuperFastAttack(value)
-    SuperFastAttackEnabled = value
-    if SuperFastAttackEnabled then
-        SuperFastAttackConnection = game:GetService("RunService").Heartbeat:Connect(function()
-            pcall(function()
-                RigC.activeController.timeToNextAttack = 0
-                RigC.activeController.attacking = false
-                RigC.activeController.blocking = false
-                RigC.activeController.timeToNextAttack = 0
-                RigC.activeController.timeToNextBlock = 0
-                RigC.activeController.increment = 3
-                RigC.activeController.hitboxMagnitude = 100
-                game.Players.LocalPlayer.Character.Stun.Value = 0
-                game.Players.LocalPlayer.Character.Humanoid.Sit = false
-  
-                VirtualUser:CaptureController()
-                VirtualUser:Button1Down(Vector2.new(1280, 672))
-                kkii:Stop()
-            end)
-        end)
-    else
-        if SuperFastAttackConnection then
-            SuperFastAttackConnection:Disconnect()
-        end
+local function toggleBringNPCsScript(value)
+    bringNpcsToggle = value
+    while bringNpcsToggle do
+        bringNPCsToPlayer()
+        wait(1)
     end
 end
 
-
-local function AttackOptionSelected(option)
-    if option == "Fast Attack" then
-        EnableFastAttack(true)
-        EnableSuperFastAttack(false)
-    elseif option == "Super" then
-        EnableFastAttack(false)
-        EnableSuperFastAttack(true)
-    end
-end
-
--- Adiciona um dropdown menu na interface do usuário para selecionar o tipo de ataque
-local attackOptionsDropdown = Tab:AddDropdown({
-    Name = "Attack Options",
-    Default = "Fast Attack",
-    Options = {Fast Attack, Super},
-    Callback = AttackOptionSelected
+Tab2:AddToggle({
+    Name = "Bring NPCs",
+    Default = false,
+    Callback = toggleBringNPCsScript
 })

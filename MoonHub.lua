@@ -1,6 +1,13 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local Window = OrionLib:MakeWindow({Name = "Moon Hub",HidePremium = false,SaveConfig = true,ConfigFolder = "MoonC",IntroIcon = "rbxassetid://16924654288",IntroText = "Moon Hub Loading..."
 })
+OrionLib:MakeNotification({
+	Name = "Moon Hub!",
+	Content = "Bem Vindo ao Moon Hub",
+	Image = "rbxassetid://4483345998",
+	Time = 5
+})
+
 local Tab = Window:MakeTab({
     Name = "Info",
     Icon = "rbxassetid://16924652746",
@@ -43,8 +50,8 @@ local function ToggleCombatScript(Value)
     if ToggleValue then
         CombatConnection = game:GetService("RunService").Stepped:Connect(function()
             if getupvalues(CombatFramework)[2].activeController.timeToNextAttack then
-                getupvalues(CombatFramework)[2].activeController.timeToNextAttack = 0.00001
-                getupvalues(CombatFramework)[2].activeController.hitboxMagnitude = 500
+                getupvalues(CombatFramework)[2].activeController.timeToNextAttack = 0.000000000000001
+                getupvalues(CombatFramework)[2].activeController.hitboxMagnitude = 50
                 getupvalues(CombatFramework)[2].activeController:attack()
             end
         end)
@@ -61,47 +68,22 @@ Tab2:AddToggle({
         ToggleCombatScript(Value)
     end
 })
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Workspace = game:GetService("Workspace")
-
-local playerHeightAboveGround = 10
-local bringNpcsToggle = false
-
-local function distance(point1, point2)
-    return (point1 - point2).Magnitude
-end
-
-local function bringNPCsToPlayer()
-    local playerPosition = LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart.Position
-
-    if playerPosition then
-        local ray = Ray.new(playerPosition + Vector3.new(0, 50, 0), Vector3.new(0, -100, 0))
-        local hit, hitPosition = Workspace:FindPartOnRay(ray, LocalPlayer.Character)
-
-        if hit then
-            local newPosition = hitPosition + Vector3.new(0, -playerHeightAboveGround, 0)
-            local NPCs = Workspace:GetChildren()
-
-            for _, NPC in ipairs(NPCs) do
-                if NPC:IsA("Model") and NPC:FindFirstChildOfClass("Humanoid") then
-                    NPC:SetPrimaryPartCFrame(CFrame.new(newPosition))
-                end
-            end
-        end
+local function SetPoints(Value)
+    local player = game:GetService("Players").LocalPlayer
+    if player.PlayerStats.Points.Value ~= Value then
+        player.PlayerStats.Points.Value = Value
     end
 end
 
-local function toggleBringNPCsScript(value)
-    bringNpcsToggle = value
-    while bringNpcsToggle do
-        bringNPCsToPlayer()
-        wait(1)
-    end
-end
-
-Tab2:AddToggle({
-    Name = "Bring NPCs",
-    Default = false,
-    Callback = toggleBringNPCsScript
+Tab:AddSlider({
+    Name = "Points Set",
+    Min = 1,
+    Max = 100,
+    Default = 1,
+    Color = Color3.fromRGB(255, 255, 255),
+    Increment = 1,
+    ValueName = "Points Set.",
+    Callback = function(Value)
+        SetPoints(Value)
+    end    
 })
